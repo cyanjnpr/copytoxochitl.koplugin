@@ -7,11 +7,11 @@ to be copied over to native xochitl notebooks.
 
 1. Clone this repository into your plugins folder. 
 If you are using toltec it should be located at 
-*/home/root/.entware/koreader/plugins*
+*/home/root/.entware/koreader/plugins/*.
 2. Download [binary release](https://github.com/cyanjnpr/karMtka/releases/latest) of karMtka or
 [build it yourself](https://github.com/cyanjnpr/karMtka?tab=readme-ov-file#building) for your device.
-3. Copy binary file to the device.
-4. If the directory in which you placed the executable is not added to the PATH, 
+3. Copy binary file to the device under the name *karmtka*.
+5. If the directory in which you placed the executable is not added to the PATH, 
 specify executable path from the plugin settings:
 *Tools > KarMtka > Settings > Custom path to the karMtka executable*
 
