@@ -1,9 +1,15 @@
-local _ = require("gettext")
+local Device = require("device")
+
+if not Device.isRemarkable() then
+    return { disabled = true, }
+end
 
 local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local Notification = require("ui/widget/notification")
 local ConfirmBox = require("ui/widget/confirmbox")
+
+local _ = require("gettext")
 
 local KarmtkaMenu = require("menu")
 local KarmtkaSettings = require("settings")
@@ -42,12 +48,13 @@ function Karmtka:buildCommand()
         KarmtkaSettings.settings:readSetting("exe_path", ""))
     local command = {}
     table.insert(command, executable)
-    table.insert(command, " ")
-    table.insert(command, "-x ")
-    table.insert(command, "-i ")
+    table.insert(command, " --device ")
+    table.insert(command, (Device.model == "reMarkable Ferrari" and "rmpp" or "rm"))
+    table.insert(command, " --xochitl ")
+    table.insert(command, "--inject ")
     table.insert(command, KarmtkaSettings.settings:readSetting("inject_mode", DEFAULT_MODE))
     table.insert(command, " ")
-    table.insert(command, "-m ")
+    table.insert(command, "--margin ")
     table.insert(command, KarmtkaSettings.settings:readSetting("margin", DEFAULT_MARGIN))
     table.insert(command, " ")
     table.insert(command, "--overwrite")
@@ -67,9 +74,9 @@ end
 
 function Karmtka:WarnCopyToXochitl(text)
     UIManager:show(ConfirmBox:new{
-        text = _("Copy to Xochitl - Proceed?\n\
-Some of the injection modes can overwrite existing pages in your notebook.\
-Make sure you understand the risks.\n\
+        text = _("Copy to Xochitl - Proceed? \n\n\z
+Some of the injection modes can overwrite existing pages in your notebook. \z
+Make sure you understand the risks.\n\n\z
 You can disable this warning in the settings."),
         icon = "notice-warning",
         ok_text = _("Copy"),

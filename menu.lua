@@ -1,11 +1,11 @@
-local _ = require("gettext")
-local FFIUtil = require("ffi/util")
-local Template = FFIUtil.template
-
 local UIManager = require("ui/uimanager")
 local SpingWidget = require("ui/widget/spinwidget")
 local RadioButtonWidget = require("ui/widget/radiobuttonwidget")
 local InputDialog = require("ui/widget/inputdialog")
+
+local _ = require("gettext")
+local FFIUtil = require("ffi/util")
+local T = FFIUtil.template
 
 local KarmtkaMenu = {}
 
@@ -35,15 +35,15 @@ function KarmtkaMenu:getSubItemTable(karmtka_settings)
                 },
                 {
                     text_func = function ()
-                        return Template(_("Custom path to the karMtka executable: %1"),
+                        return T(_("Custom path to the karMtka executable: %1"),
                             (#karmtka_settings.settings:readSetting("exe_path", "") > 0 and "Set" or "Not set"))
                     end,
                     separator = true,
                     callback = function (touchmenu_instance)
                         self.dialog = InputDialog:new{
-                            title = "Custom path to the karMtka executable",
-                            description = "If the executable can't be found in directories included in PATH, \
-provide the full path manually. It will be used only as a fallback path.",
+                            title = _("Custom path to the karMtka executable"),
+                            description = _("If the executable cannot be found in directories included in PATH, \z
+provide the full path manually. It will be used only as a fallback path."),
                             input = karmtka_settings.settings:readSetting("exe_path", ""),
                             buttons = {
                                 {
@@ -70,7 +70,7 @@ provide the full path manually. It will be used only as a fallback path.",
                 },
                 {
                     text_func = function ()
-                        return Template(_("Page Margin: %1"), 
+                        return T(_("Page Margin: %1 px"), 
                             karmtka_settings.settings:readSetting("margin", DEFAULT_MARGIN))
                     end,
                     callback = function (touchmenu_instance)
@@ -80,6 +80,7 @@ provide the full path manually. It will be used only as a fallback path.",
                             value_max = 600,
                             value_step = 1,
                             value_hold_step = 50,
+                            unit = "px",
                             default_value = DEFAULT_MARGIN,
                             title_text = _("Page Margin"),
                             info_text = _("Set the size of page margin in pixels"),
@@ -93,7 +94,7 @@ provide the full path manually. It will be used only as a fallback path.",
                 },
                 {
                     text_func = function ()
-                        return Template(_("Inject Mode: %1"), 
+                        return T(_("Inject Mode: %1"), 
                             karmtka_settings.settings:readSetting("inject_mode", DEFAULT_MODE))
                     end,
                     callback = function (touchmenu_instance)
@@ -103,13 +104,13 @@ provide the full path manually. It will be used only as a fallback path.",
                             radio_buttons = {
                                 {
                                     {
-                                        text = "Append",
+                                        text = _("Append"),
                                         provider = "append",
                                         checked = string.lower(karmtka_settings.settings:readSetting(
                                             "inject_mode", DEFAULT_MODE)) == "append"
                                     },
                                     {
-                                        text = "Current",
+                                        text = _("Current"),
                                         provider = "current",
                                         checked = string.lower(karmtka_settings.settings:readSetting(
                                             "inject_mode", DEFAULT_MODE)) == "current"
@@ -117,13 +118,13 @@ provide the full path manually. It will be used only as a fallback path.",
                                 },
                                 {
                                     {
-                                        text = "Next",
+                                        text = _("Next"),
                                         provider = "next",
                                         checked = string.lower(karmtka_settings.settings:readSetting(
                                             "inject_mode", DEFAULT_MODE)) == "next"
                                     },
                                     {
-                                        text = "Last",
+                                        text = _("Last"),
                                         provider = "last",
                                         checked = string.lower(karmtka_settings.settings:readSetting(
                                             "inject_mode", DEFAULT_MODE)) == "last"
