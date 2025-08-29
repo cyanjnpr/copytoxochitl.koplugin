@@ -1,4 +1,4 @@
-# KOReader KarMtka Plugin
+# KOReader KarMtka / Copy to Xochitl Plugin
 
 A KOReader plugin that enables highlighted fragments of documents
 to be copied over to native xochitl notebooks.
@@ -13,11 +13,23 @@ If you are using toltec it should be located at
 3. Copy binary file to the device under the name *karmtka*.
 5. If the directory in which you placed the executable is not added to the PATH, 
 specify executable path from the plugin settings:
-*Tools > KarMtka > Settings > Custom path to the karMtka executable*
+*Tools > KarMtka / Copy To Xochitl > Settings > Custom path to the karMtka executable*
 
 ## Usage
 
 Default 'Copy' button available from the highlight menu is replaced by 'Copy to Xochitl' button.
+By default it will overwrite current page in last modified notebook with selected text.
+
+Settings are available under:
+*Tools > KarMtka / Copy To Xochitl > Settings*
+
+## Caveats
+
+Xochitl writes changes to disk only after closing the notebook and reads from disk only after opening it.
+To effectively use this plugin you must close the target notebook in xochitl before switching to KOReader to copy selection.
+
+In case of `append` mode which adds new page to the notebook, the whole xochitl apps needs to be restarted to detect changes.
+Three other modes work fine without restarting.
 
 ## Compatibility
 

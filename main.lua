@@ -10,6 +10,8 @@ local Notification = require("ui/widget/notification")
 local ConfirmBox = require("ui/widget/confirmbox")
 
 local _ = require("gettext")
+local FFIUtil = require("ffi/util")
+local T = FFIUtil.template
 
 local KarmtkaMenu = require("menu")
 local KarmtkaSettings = require("settings")
@@ -32,7 +34,7 @@ end
 
 function Karmtka:addToMainMenu(menu_items)
     menu_items.karmtka = {
-        text = "KarMtka",
+        text = "KarMtka / Copy To Xochitl",
         sorting_hint = "tools",
         sub_item_table = KarmtkaMenu:getSubItemTable(KarmtkaSettings),
     }
@@ -42,27 +44,71 @@ function Karmtka:onFlushSettings()
     KarmtkaSettings:save()
 end
 
-function Karmtka:buildCommand()
-    local executable = (Karmtka:isInstalledInPath() and 
-        "karmtka" or 
+function Karmtka:executable()
+    return (Karmtka:isInstalledInPath() and
+        "karmtka" or
         KarmtkaSettings.settings:readSetting("exe_path", ""))
+end
+
+function Karmtka:buildListCommand()
     local command = {}
-    table.insert(command, executable)
-    table.insert(command, " --device ")
-    table.insert(command, (Device.model == "reMarkable Ferrari" and "rmpp" or "rm"))
-    table.insert(command, " --xochitl ")
-    table.insert(command, "--inject ")
-    table.insert(command, KarmtkaSettings.settings:readSetting("inject_mode", DEFAULT_MODE))
-    table.insert(command, " ")
-    table.insert(command, "--margin ")
-    table.insert(command, KarmtkaSettings.settings:readSetting("margin", DEFAULT_MARGIN))
-    table.insert(command, " ")
-    table.insert(command, "--overwrite")
+    table.insert(command, self:executable())
+    table.insert(command, " --xochitl --list")
     return table.concat(command)
 end
 
-function Karmtka:copyToXochitl(text)
-    local handle = io.popen(self:buildCommand(), 'w')
+-- dry run to get information about which notebook/page will be affected during normal run
+function Karmtka:buildSimulateCommand(notebook)
+    local command = {}
+    table.insert(command, self:executable())
+    table.insert(command, " --notebook '")
+    table.insert(command, notebook)
+    table.insert(command, "' --xochitl --inject ")
+    table.insert(command, KarmtkaSettings.settings:readSetting("inject_mode", DEFAULT_MODE))
+    table.insert(command, " --overwrite --dry")
+    return table.concat(command)
+end
+
+function Karmtka:buildWriteCommand(notebook)
+    local command = {}
+    table.insert(command, self:executable())
+    table.insert(command, " --device ")
+    table.insert(command, (Device.model == "reMarkable Ferrari" and "rmpp" or "rm"))
+    table.insert(command, " --notebook '")
+    table.insert(command, notebook)
+    table.insert(command, "' --xochitl --inject ")
+    table.insert(command, KarmtkaSettings.settings:readSetting("inject_mode", DEFAULT_MODE))
+    table.insert(command, " --margin ")
+    table.insert(command, KarmtkaSettings.settings:readSetting("margin", DEFAULT_MARGIN))
+    table.insert(command, " --style ")
+    table.insert(command, KarmtkaSettings.settings:readSetting("font_size", DEFAULT_SIZE))
+    table.insert(command, " --overwrite")
+    return table.concat(command)
+end
+
+-- list <max> recent notebooks by full path
+function Karmtka:list(max)
+    local notebooks = {}
+    local handle = io.popen(self:buildListCommand(), 'r')
+    if handle then
+        ---@type string
+        local line = handle:read('l')
+        while line and max > 0 do
+            -- shell limitations, ignore problematic notebooks
+            -- they can always be used as the most recent ones
+            -- without picking them by name
+            if not line:find("'") then
+                table.insert(notebooks, line)
+                max = max - 1
+            end
+            line = handle:read('l')
+        end
+    end
+    return notebooks
+end
+
+function Karmtka:copyToXochitl(text, notebook)
+    local handle = io.popen(self:buildWriteCommand(notebook), 'w')
     if handle then
         handle:write(text)
         handle:close()
@@ -72,18 +118,53 @@ function Karmtka:copyToXochitl(text)
     })
 end
 
-function Karmtka:WarnCopyToXochitl(text)
+-- display which notebook will be affected before copyinng
+function Karmtka:WarnCopyToXochitl(text, notebook)
+    local handle = io.popen(self:buildSimulateCommand(notebook), 'r')
+    local params = {
+        ["notebook"] = "UNKNOWN",
+        ["page"] = "UNKNOWN",
+    }
+    if handle then
+        ---@type string
+        local line = handle:read('l')
+        while line do
+            print(line)
+            local sep = line:find(":")
+            if sep then
+                local key = line:sub(1, sep-1):lower()
+                local val = line:sub(sep+1)
+                if params[key] then
+                    params[key] = val
+                end
+            end
+            line = handle:read('l')
+        end
+        handle:close()
+    end
     UIManager:show(ConfirmBox:new{
-        text = _("Copy to Xochitl - Proceed? \n\n\z
-Some of the injection modes can overwrite existing pages in your notebook. \z
-Make sure you understand the risks.\n\n\z
-You can disable this warning in the settings."),
+        text = T(_("Copy to Xochitl - Proceed? \n\n\z
+Target Notebook: %1\n\z
+Target Page: %2"), params["notebook"], params["page"]),
         icon = "notice-warning",
         ok_text = _("Copy"),
         ok_callback = function()
-            self:copyToXochitl(text)
+            self:copyToXochitl(text, notebook)
         end,
     })
+end
+
+-- display <num_notebooks> recent notebooks to choose from as the target for copy operation
+function Karmtka:copySelectNotebook(text, num_notebooks)
+    local function copyToNotebook(notebook)
+        if KarmtkaSettings.settings:readSetting("display_warning", DEFAULT_WARNING) then
+            self:WarnCopyToXochitl(text, notebook)
+        else
+            self:copyToXochitl(text, notebook)
+        end
+    end
+    local dialog = KarmtkaMenu:getNotebookSelectionDialog(self:list(num_notebooks), copyToNotebook)
+    UIManager:show(dialog)
 end
 
 function Karmtka:isInstalled()
@@ -118,10 +199,14 @@ function Karmtka:addToHighlightDialog()
             text = _("Copy to Xochitl"),
             enabled = self:isInstalled(),
             callback = function ()
-                if true or KarmtkaSettings.settings:readSetting("display_warning", DEFAULT_WARNING) then
-                    self:WarnCopyToXochitl(this.selected_text.text)
+                if KarmtkaSettings.settings:readSetting("display_notebook_query", DEFAULT_NOTEBOOOK_QUERY) then
+                    self:copySelectNotebook(this.selected_text.text, 7)
                 else
-                    self:copyToXochitl(this.selected_text.text)
+                    if KarmtkaSettings.settings:readSetting("display_warning", DEFAULT_WARNING) then
+                        self:WarnCopyToXochitl(this.selected_text.text, "")
+                    else
+                        self:copyToXochitl(this.selected_text.text, "")
+                    end
                 end
                 this:onClose()
             end,
