@@ -64,7 +64,7 @@ function KarmtkaMenu:getSubItemTable(karmtka_settings)
                     end,
                 },
                 {
-                    text = _("Always ask for target notebook"),
+                    text = _("Always ask for the target notebook"),
                     separator = true,
                     checked_func = function ()
                         return karmtka_settings.settings:readSetting("display_notebook_query", DEFAULT_NOTEBOOOK_QUERY)

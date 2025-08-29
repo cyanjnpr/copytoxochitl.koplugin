@@ -1,7 +1,7 @@
 local _ = require("gettext")
 
 return {
-    name = "karmtka",
-    fullname = "KarMtka / Copy To Xochitl",
+    name = "copytoxochitl",
+    fullname = "Copy To Xochitl / KarMtka",
     description = _([[Copy highlighted text into reMarkable notebooks]]),
 }

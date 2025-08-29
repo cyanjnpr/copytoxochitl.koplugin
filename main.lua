@@ -17,9 +17,9 @@ local KarmtkaMenu = require("menu")
 local KarmtkaSettings = require("settings")
 
 local Karmtka = WidgetContainer:extend{
-    name = "karmtka",
+    name = "copytoxochitl",
     is_doc_only = false,
-    config_file = "karmtka.lua",
+    config_file = "copytoxochitl.lua",
 }
 
 function Karmtka:init()
@@ -34,7 +34,7 @@ end
 
 function Karmtka:addToMainMenu(menu_items)
     menu_items.karmtka = {
-        text = "KarMtka / Copy To Xochitl",
+        text = "Copy To Xochitl / KarMtka",
         sorting_hint = "tools",
         sub_item_table = KarmtkaMenu:getSubItemTable(KarmtkaSettings),
     }
@@ -114,7 +114,7 @@ function Karmtka:copyToXochitl(text, notebook)
         handle:close()
     end
     UIManager:show(Notification:new{
-        text = _("Selection copied to xochitl."),
+        text = _("Selection copied to Xochitl."),
     })
 end
 

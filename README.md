@@ -1,7 +1,7 @@
-# KOReader KarMtka / Copy to Xochitl Plugin
+# KOReader Copy to Xochitl / KarMtka Plugin
 
 A KOReader plugin that enables highlighted fragments of documents
-to be copied over to native xochitl notebooks.
+to be copied over to native Xochitl notebooks.
 
 ## Installation
 
@@ -13,15 +13,15 @@ If you are using toltec it should be located at
 3. Copy binary file to the device under the name *karmtka*.
 5. If the directory in which you placed the executable is not added to the PATH, 
 specify executable path from the plugin settings:
-*Tools > KarMtka / Copy To Xochitl > Settings > Custom path to the karMtka executable*
+*Tools > Copy To Xochitl / KarMtka  > Settings > Custom path to the karMtka executable*
 
 ## Usage
 
 Default 'Copy' button available from the highlight menu is replaced by 'Copy to Xochitl' button.
-By default it will overwrite current page in last modified notebook with selected text.
+By default it will overwrite current page in the last modified notebook with selected text.
 
 Settings are available under:
-*Tools > KarMtka / Copy To Xochitl > Settings*
+*Tools > Copy To Xochitl / KarMtka > Settings*
 
 ## Caveats
 
@@ -35,4 +35,4 @@ Three other modes work fine without restarting.
 
 This plugin is developed only for the reMarkable devices. It should
 work on all reMarkable devices that use version 6 of lines format to store documents 
-(software releases 3.X).
+(software releases **3.X**).
