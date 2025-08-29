@@ -24,7 +24,7 @@ function KarmtkaMenu:getNotebookSelectionDialog(notebooks, callback)
         }})
     end
     self.notebookSelectionDialog = ButtonDialog:new{
-        title = "Select target notebook",
+        title = _("Select target notebook"),
         buttons = buttons,
     }
     return self.notebookSelectionDialog
